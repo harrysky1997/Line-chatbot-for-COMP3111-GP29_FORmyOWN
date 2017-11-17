@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -49,11 +50,11 @@ import com.example.bot.spring.DatabaseEngine;
 
 @RunWith(SpringRunner.class)
 //@SpringBootTest(classes = { KitchenSinkTester.class, DatabaseEngine.class })
-@SpringBootTest(classes = { KitchenSinkTester.class, SQLDatabaseEngine.class })
+@SpringBootTest(classes = { KitchenSinkTester.class, SQLDatabaseEngine.class, DatabaseEngine.class})
 public class KitchenSinkTester {
 
 	@Autowired
-	private DatabaseEngine databaseEngine;
+	private SQLDatabaseEngine databaseEngine;
 
 	@Test
 	public void testNotFound() throws Exception {
@@ -145,5 +146,89 @@ public class KitchenSinkTester {
 		}
 		System.out.println(result);
 	}
+	
+	@Test
+	public void tourTestByPriceWithNoSort() throws Exception {
+		boolean thrown = false;
+		String result = null;
+		try {
+			result = this.databaseEngine.search("Monday with no price");
+		} catch (Exception e) {
+			thrown = true;
+		}
+		System.out.println(result);
+	}
 
+	@Test
+	public void tourTestByAttraction() throws Exception {
+		boolean thrown = false;
+		String result = null;
+		try {
+			result = this.databaseEngine.search("spring");
+		} catch (Exception e) {
+			thrown = true;
+		}
+		System.out.println(result);
+	}
+	
+	@Test
+	public void tourTestByAttractionWithPrice() throws Exception {
+		boolean thrown = false;
+		String result = null;
+		try {
+			result = this.databaseEngine.search("spring sort by price");
+		} catch (Exception e) {
+			thrown = true;
+		}
+		System.out.println(result);
+	}
+	
+	@Test
+	public void tourTestByAttractionWithWeekday() throws Exception {
+		boolean thrown = false;
+		String result = null;
+		try {
+			result = this.databaseEngine.search("spring in Monday");
+		} catch (Exception e) {
+			thrown = true;
+		}
+		System.out.println(result);
+	}
+	
+	@Test
+	public void tourTestByAttractionWithWeekdayAndPrice() throws Exception {
+		boolean thrown = false;
+		String result = null;
+		try {
+			result = this.databaseEngine.search("spring in Monday sort by price");
+		} catch (Exception e) {
+			thrown = true;
+		}
+		System.out.println(result);
+	}
+	
+	@Test
+	public void tourTestByID() throws Exception {
+		boolean thrown = false;
+		String result = null;
+		try {
+			result = this.databaseEngine.search("2D002");
+		} catch (Exception e) {
+			thrown = true;
+		}
+		System.out.println(result);
+	}
+	
+	@Test
+	public void tourTestNotMatched() throws Exception {
+		boolean thrown = false;
+		String result = null;
+		try {
+			result = this.databaseEngine.search("random input");
+		} catch (Exception e) {
+			thrown = true;
+		}
+		System.out.println(result);
+	}
+	
 }
