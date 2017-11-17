@@ -76,7 +76,7 @@ public class SQLDatabaseEngine extends DatabaseEngine {
             System.out.println("searchRes()" + e);
         }
         return result;
-    } 
+    }
 
     private String searchTour() throws Exception{
         String result = null;
@@ -196,4 +196,4 @@ public class SQLDatabaseEngine extends DatabaseEngine {
             return tourList;
         throw new Exception("NOT FOUND");
     }
-}
+} 
