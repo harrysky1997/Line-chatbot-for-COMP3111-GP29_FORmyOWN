@@ -213,14 +213,12 @@ public class KitchenSinkController {
 		reply(replyToken, new StickerMessage(content.getPackageId(), content.getStickerId()));
 	}
 */
-	
 	private void handleTextContent(String replyToken, Event event, TextMessageContent content)
             throws Exception {
         String text = content.getText();
 
         log.info("Got text message from {}: {}", replyToken, text);
-        switch (text) {
-        /*
+        switch (text) {/*
             case "profile": {
                 String userId = event.getSource().getUserId();
                 if (userId != null) {
@@ -263,8 +261,8 @@ public class KitchenSinkController {
                 TemplateMessage templateMessage = new TemplateMessage("Carousel alt text", carouselTemplate);
                 this.reply(replyToken, templateMessage);
                 break;
-            }
-         	*/
+            }*/
+
 // 		This is the part I mostly changed about greeting the customer and default error msg
 //		ProfileGetter() is also changed
 //		 ^Rex
@@ -361,6 +359,10 @@ public class KitchenSinkController {
 		tempFile.toFile().deleteOnExit();
 		return new DownloadedContent(tempFile, createUri("/downloaded/" + tempFile.getFileName()));
 	}
+
+
+
+
 */
 	public KitchenSinkController() {
 		database = new SQLDatabaseEngine();
