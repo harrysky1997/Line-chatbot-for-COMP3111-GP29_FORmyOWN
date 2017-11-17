@@ -102,7 +102,7 @@ public class Customer {
 			return amount;
 	}
 	public double getPayAmount() { return paid_amount;}
-	public boolean haveRemainPayment()  { return if(paid_amount >= fee.getTotalFee());}
+	public boolean haveRemainPayment()  { return (paid_amount >= fee.getTotalFee());}
 	// here (by Ryan Tang)
 }
 
@@ -133,7 +133,7 @@ class CustomerNo{
 }
 
 // Working form here to ...
-public class Fee{
+class Fee{
 	private double total_fee;
 	private double adult_fee;
 	private double children_fee;
