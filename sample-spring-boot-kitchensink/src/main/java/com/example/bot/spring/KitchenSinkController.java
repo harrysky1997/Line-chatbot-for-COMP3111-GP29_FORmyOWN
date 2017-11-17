@@ -93,14 +93,12 @@ import java.net.URI;
 @Slf4j
 @LineMessageHandler
 public class KitchenSinkController {
-	
-
 
 	@Autowired
 	private LineMessagingClient lineMessagingClient;
 
 	@SuppressWarnings("LossyEncoding")
-
+/*
 	@EventMapping
 	public void handleTextMessageEvent(MessageEvent<TextMessageContent> event) throws Exception {
 		log.info("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
@@ -186,7 +184,7 @@ public class KitchenSinkController {
 	public void handleOtherEvent(Event event) {
 		log.info("Received message(Ignored): {}", event);
 	}
-
+*/
 	private void reply(@NonNull String replyToken, @NonNull Message message) {
 		reply(replyToken, Collections.singletonList(message));
 	}
@@ -210,23 +208,25 @@ public class KitchenSinkController {
 		this.reply(replyToken, new TextMessage(message));
 	}
 
-
+/*
 	private void handleSticker(String replyToken, StickerMessageContent content) {
 		reply(replyToken, new StickerMessage(content.getPackageId(), content.getStickerId()));
 	}
-
+*/
+	
 	private void handleTextContent(String replyToken, Event event, TextMessageContent content)
             throws Exception {
         String text = content.getText();
 
         log.info("Got text message from {}: {}", replyToken, text);
         switch (text) {
+        /*
             case "profile": {
                 String userId = event.getSource().getUserId();
                 if (userId != null) {
                     lineMessagingClient
                             .getProfile(userId)
-                            .whenComplete(new ProfileGetter (this, replyToken));
+                            .whenComplete(new ProfileGetter (this, replyToken, ""));
                 } else {
                     this.replyText(replyToken, "Bot can't use profile API without user ID");
                 }
@@ -264,52 +264,66 @@ public class KitchenSinkController {
                 this.reply(replyToken, templateMessage);
                 break;
             }
-            case "tour": {
-            	List<String> tour = database.getTourList();
-            	List<Message> multiMessages = new ArrayList<Message>();
-            	List<ButtonsTemplate> buttonTemplate = new ArrayList<ButtonsTemplate>();
-            	
-            	int j = 0; int diff;
-            	int count = tour.size();
-            	int templateCount = 0;
-            	
-            	List<Action> tourEnroll;
-            	
-            	while (j < count) {
-            		tourEnroll = new ArrayList<Action>();
-            		for (int i = 0; i < 4 && j < count; i++) {            			
-            			String tourName = tour.get(j);
-            			tourEnroll.add(new PostbackAction(
-            				tourName, "You successfully enroll in " + tourName + ".","Enroll in "+tourName+"."));
-            			j++;
-            		}
-            		buttonTemplate.add(new ButtonsTemplate(null, null, "Tour Selection", tourEnroll));
-            		multiMessages.add(new TemplateMessage("Button alt text", buttonTemplate.get(templateCount++)));            		
-            		}            	
-            	this.reply(replyToken, multiMessages);
-            	break;
-            }      
-            default:
-            	String reply = null;
-            	try {
-            		reply = database.search(text);
-            	} catch (Exception e) {
-            		reply = text;
-            	}
-                log.info("Returns echo message {}: {}", replyToken, reply);
-//                this.replyText(
-//                        replyToken,
-//                        itscLOGIN + " says " + reply
-//                );
-				this.replyText(
-						replyToken,
-						reply
-				);
+         	*/
+// 		This is the part I mostly changed about greeting the customer and default error msg
+//		ProfileGetter() is also changed
+//		 ^Rex
+		default:{
+			if ((text.toLowerCase().matches("hi(.*)|hello(.*)")))
+			{
+				String userId = event.getSource().getUserId();
+				if (userId != null) {
+					lineMessagingClient
+					.getProfile(userId)
+					.whenComplete(new ProfileGetter (this, replyToken, "Welcome"));
+				}
+				break;
+			}
+			String reply = null;
+			try {
+				reply = database.search(text);
+			} catch (Exception e) {
+				reply = "Sorry, I don't quite understand. Can you be more precise?";
+			}
+			log.info("Returns error message {}: {}", replyToken, reply);
 
-                break;
-        }
-    }
-
+			//Creating Filter Result & Template Messages if filtering is done
+            List<Message> multiMessages = new ArrayList<Message>();
+            multiMessages.add(new TextMessage(reply));
+            //List<String> tour = database.getFilterList();
+            List<Tour> tourList = database.getTourList();
+            
+            if (tourList != null && !(text.matches("I want to enroll in(.)*"))) {
+        	List<CarouselTemplate> carouselTemplate = new ArrayList<CarouselTemplate>();
+        	List<CarouselColumn> carouselColumn;
+        	List<Action> tourEnroll;
+        	int count = 0;
+        	int numTour = tourList.size();
+        	int templateCount = 0;        	
+        	while (count < numTour) {
+        		carouselColumn = new ArrayList<CarouselColumn>();
+        		for (int columnCount = 0; columnCount < 5 && count < numTour; columnCount++) {            		
+        			tourEnroll = new ArrayList<Action>();            			
+        			for (int actionCount = 0; actionCount < 3 && count < numTour; actionCount++) {            			
+        				String tourID = tourList.get(count).getID();
+        				tourEnroll.add(new MessageAction(
+        					tourID, "I want to enroll in " + tourID + "."));
+        				count++;
+        			}
+        			carouselColumn.add(new CarouselColumn(null, null, "Tour Selection", tourEnroll));
+        			if ((numTour - count) < 3) break;
+        		}
+        		carouselTemplate.add(new CarouselTemplate(carouselColumn));
+        		multiMessages.add(new TemplateMessage("Carousel alt text", carouselTemplate.get(templateCount++)));
+        	}
+            }
+			this.reply(replyToken, multiMessages);
+			//database.resetFilterList();
+			break;
+		}
+		}
+	}
+/*
 	static String createUri(String path) {
 		return ServletUriComponentsBuilder.fromCurrentContextPath().path(path).build().toUriString();
 	}
@@ -347,20 +361,16 @@ public class KitchenSinkController {
 		tempFile.toFile().deleteOnExit();
 		return new DownloadedContent(tempFile, createUri("/downloaded/" + tempFile.getFileName()));
 	}
-
-
-	
-
-
+*/
 	public KitchenSinkController() {
 		database = new SQLDatabaseEngine();
-		itscLOGIN = System.getenv("ITSC_LOGIN");
+		//itscLOGIN = System.getenv("ITSC_LOGIN");
 	}
 
 	private SQLDatabaseEngine database;
-	private String itscLOGIN;
-	
+	//private String itscLOGIN;
 
+/*
 	//The annontation @Value is from the package lombok.Value
 	//Basically what it does is to generate constructor and getter for the class below
 	//See https://projectlombok.org/features/Value
@@ -369,31 +379,32 @@ public class KitchenSinkController {
 		Path path;
 		String uri;
 	}
-
+*/
 
 	//an inner class that gets the user profile and status message
 	class ProfileGetter implements BiConsumer<UserProfileResponse, Throwable> {
 		private KitchenSinkController ksc;
 		private String replyToken;
-		
-		public ProfileGetter(KitchenSinkController ksc, String replyToken) {
+		private String text;
+
+		public ProfileGetter(KitchenSinkController ksc, String replyToken, String text) {
 			this.ksc = ksc;
 			this.replyToken = replyToken;
+			this.text = text;
 		}
 		@Override
-    	public void accept(UserProfileResponse profile, Throwable throwable) {
-    		if (throwable != null) {
-            	ksc.replyText(replyToken, throwable.getMessage());
-            	return;
-        	}
-        	ksc.reply(
-                	replyToken,
-                	Arrays.asList(new TextMessage(
-                		"Display name: " + profile.getDisplayName()),
-                              	new TextMessage("Status message: "
-                            		  + profile.getStatusMessage()))
-        	);
-    	}
-    }
-	
+		public void accept(UserProfileResponse profile, Throwable throwable) {
+			if (throwable != null) {
+				ksc.replyText(replyToken, throwable.getMessage());
+				return;
+			}
+			ksc.reply(
+					replyToken,
+					Arrays.asList(new TextMessage(text + " " + profile.getDisplayName() + "!"))
+					);
+		}
+	}
+
+
+
 }
