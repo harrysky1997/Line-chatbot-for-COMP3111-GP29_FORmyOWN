@@ -55,7 +55,7 @@ public class SQLDatabaseEngine extends DatabaseEngine {
         connection = DriverManager.getConnection(dbUrl, username, password);
 
         return connection;
-    } 
+    }
 
     private String searchRes() throws Exception{
         String result = null;
