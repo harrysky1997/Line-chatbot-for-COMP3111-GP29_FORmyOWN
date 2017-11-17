@@ -54,7 +54,7 @@ import com.example.bot.spring.DatabaseEngine;
 public class KitchenSinkTester {
 
 	@Autowired
-	private SQLDatabaseEngine databaseEngine;
+	private DatabaseEngine databaseEngine;
 
 	@Test
 	public void testNotFound() throws Exception {
